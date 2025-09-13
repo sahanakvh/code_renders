@@ -29,15 +29,15 @@ INSERT INTO rooms (id, name, capacity, equipment, is_available) VALUES
 
 -- Insert demo users with hashed passwords
 -- Password for all demo users: "password123"
--- Hash: $2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LH4s4LH.z0z0z0z0z0 (this is a placeholder - real hash will be longer)
+-- Hash: $2b$12$noXWa3qYINwY.km8MNJPPugEwqqO7zDrOqQUloEowd8lIwa/Pxz8C (this is a placeholder - real hash will be longer)
 
 -- Demo patients
 INSERT INTO users (id, email, password_hash, full_name, phone, role, language_preference) VALUES
-('10000000-0000-0000-0000-000000000001', 'patient@demo.com', '$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Demo Patient', '+91-9876543210', 'patient', 'English'),
-('10000000-0000-0000-0000-000000000002', 'john.smith@email.com', '$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'John Smith', '+91-9876543212', 'patient', 'English'),
-('10000000-0000-0000-0000-000000000003', 'priya.sharma@email.com', '$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Priya Sharma', '+91-9876543214', 'patient', 'Hindi'),
-('10000000-0000-0000-0000-000000000004', 'rajesh.kumar@email.com', '$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Rajesh Kumar', '+91-9876543216', 'patient', 'Hindi'),
-('10000000-0000-0000-0000-000000000005', 'sarah.johnson@email.com', '$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Sarah Johnson', '+91-9876543218', 'patient', 'English');
+('10000000-0000-0000-0000-000000000001', 'patient@demo.com', '$2b$12$noXWa3qYINwY.km8MNJPPugEwqqO7zDrOqQUloEowd8lIwa/Pxz8C', 'Demo Patient', '+91-9876543210', 'patient', 'English'),
+('10000000-0000-0000-0000-000000000002', 'john.smith@email.com', '$2b$12$noXWa3qYINwY.km8MNJPPugEwqqO7zDrOqQUloEowd8lIwa/Pxz8C', 'John Smith', '+91-9876543212', 'patient', 'English'),
+('10000000-0000-0000-0000-000000000003', 'priya.sharma@email.com', '$2b$12$noXWa3qYINwY.km8MNJPPugEwqqO7zDrOqQUloEowd8lIwa/Pxz8C', 'Priya Sharma', '+91-9876543214', 'patient', 'Hindi'),
+('10000000-0000-0000-0000-000000000004', 'rajesh.kumar@email.com', '$2b$12$noXWa3qYINwY.km8MNJPPugEwqqO7zDrOqQUloEowd8lIwa/Pxz8C', 'Rajesh Kumar', '+91-9876543216', 'patient', 'Hindi'),
+('10000000-0000-0000-0000-000000000005', 'sarah.johnson@email.com', '$2b$12$noXWa3qYINwY.km8MNJPPugEwqqO7zDrOqQUloEowd8lIwa/Pxz8C', 'Sarah Johnson', '+91-9876543218', 'patient', 'English');
 
 -- Insert patient details
 INSERT INTO patients (id, date_of_birth, gender, medical_history, emergency_contact, address) VALUES
@@ -49,10 +49,10 @@ INSERT INTO patients (id, date_of_birth, gender, medical_history, emergency_cont
 
 -- Demo therapists  
 INSERT INTO users (id, email, password_hash, full_name, phone, role, language_preference) VALUES
-('20000000-0000-0000-0000-000000000001', 'therapist@demo.com', '$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Demo Therapist', '+91-9876543220', 'therapist', 'English'),
-('20000000-0000-0000-0000-000000000002', 'dr.meera@ayursutra.com', '$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Dr. Meera Patel', '+91-9876543221', 'therapist', 'English'),
-('20000000-0000-0000-0000-000000000003', 'dr.anand@ayursutra.com', '$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Dr. Anand Gupta', '+91-9876543222', 'therapist', 'Hindi'),
-('20000000-0000-0000-0000-000000000004', 'dr.kavitha@ayursutra.com', '$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Dr. Kavitha Rao', '+91-9876543223', 'therapist', 'English');
+('20000000-0000-0000-0000-000000000001', 'therapist@demo.com', '$2b$12$noXWa3qYINwY.km8MNJPPugEwqqO7zDrOqQUloEowd8lIwa/Pxz8C', 'Demo Therapist', '+91-9876543220', 'therapist', 'English'),
+('20000000-0000-0000-0000-000000000002', 'dr.meera@ayursutra.com', '$2b$12$noXWa3qYINwY.km8MNJPPugEwqqO7zDrOqQUloEowd8lIwa/Pxz8C', 'Dr. Meera Patel', '+91-9876543221', 'therapist', 'English'),
+('20000000-0000-0000-0000-000000000003', 'dr.anand@ayursutra.com', '$2b$12$noXWa3qYINwY.km8MNJPPugEwqqO7zDrOqQUloEowd8lIwa/Pxz8C', 'Dr. Anand Gupta', '+91-9876543222', 'therapist', 'Hindi'),
+('20000000-0000-0000-0000-000000000004', 'dr.kavitha@ayursutra.com', '$2b$12$noXWa3qYINwY.km8MNJPPugEwqqO7zDrOqQUloEowd8lIwa/Pxz8C', 'Dr. Kavitha Rao', '+91-9876543223', 'therapist', 'English');
 
 -- Insert therapist details
 INSERT INTO therapists (id, specializations, experience_years, availability_start, availability_end, availability_days, is_active) VALUES
@@ -63,7 +63,7 @@ INSERT INTO therapists (id, specializations, experience_years, availability_star
 
 -- Insert admin user
 INSERT INTO users (id, email, password_hash, full_name, phone, role, language_preference) VALUES
-('30000000-0000-0000-0000-000000000001', 'admin@demo.com', '$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Demo Admin', '+91-9876543230', 'admin', 'English');
+('30000000-0000-0000-0000-000000000001', 'admin@demo.com', '$2b$12$noXWa3qYINwY.km8MNJPPugEwqqO7zDrOqQUloEowd8lIwa/Pxz8C', 'Demo Admin', '+91-9876543230', 'admin', 'English');
 
 INSERT INTO admins (id, permissions) VALUES
 ('30000000-0000-0000-0000-000000000001', ARRAY['manage_users', 'manage_therapies', 'view_reports', 'manage_system']);

@@ -58,7 +58,7 @@ createuser -s postgres
 # Set password for postgres user (remember this password!)
 psql -U $(whoami) -d postgres -c "ALTER USER postgres PASSWORD 'your_postgres_password';"
 
-# Note: Your system user (vivek.m) will be used for database access
+# Note: Your system user (sahanak.m) will be used for database access
 # No additional database user creation is needed
 
 # Verify installation
@@ -122,7 +122,7 @@ cd /path/to/ayur-flow-sutra
 
 When prompted:
 1. Enter the password you set for the `postgres` superuser
-   (Note: The script will use your system user `vivek.m` for database access)
+   (Note: The script will use your system user `sahanak.m` for database access)
 
 **Windows:**
 ```cmd
@@ -142,8 +142,8 @@ psql -U postgres -h localhost
 
 # In PostgreSQL prompt, run these commands:
 CREATE DATABASE ayur_flow_sutra;
-GRANT ALL PRIVILEGES ON DATABASE ayur_flow_sutra TO vivek.m;
-ALTER USER vivek.m CREATEDB;
+GRANT ALL PRIVILEGES ON DATABASE ayur_flow_sutra TO sahanak.m;
+ALTER USER sahanak.m CREATEDB;
 
 # Exit PostgreSQL
 \q
@@ -156,8 +156,8 @@ psql -U postgres -h localhost
 
 # In PostgreSQL prompt, run these commands:
 CREATE DATABASE ayur_flow_sutra;
-GRANT ALL PRIVILEGES ON DATABASE ayur_flow_sutra TO vivek.m;
-ALTER USER vivek.m CREATEDB;
+GRANT ALL PRIVILEGES ON DATABASE ayur_flow_sutra TO sahanak.m;
+ALTER USER sahanak.m CREATEDB;
 
 # Exit PostgreSQL
 \q
@@ -170,10 +170,10 @@ ALTER USER vivek.m CREATEDB;
 cd /path/to/ayur-flow-sutra
 
 # Run the database schema
-psql -U vivek.m -d ayur_flow_sutra -f database/schema.sql
+psql -U sahanak.m -d ayur_flow_sutra -f database/schema.sql
 
 # Optional: Load seed data
-psql -U vivek.m -d ayur_flow_sutra -f database/seed.sql
+psql -U sahanak.m -d ayur_flow_sutra -f database/seed.sql
 ```
 
 ### Step 6: Configure Environment Variables
@@ -197,14 +197,14 @@ touch .env
 ```env
 # Environment Configuration
 NODE_ENV=development
-PORT=3003
+PORT=3001
 
 # Database Configuration
-DATABASE_URL=postgresql://vivek.m:@localhost:5432/ayur_flow_sutra
+DATABASE_URL=postgresql://sahanak.m:@localhost:5432/ayur_flow_sutra
 DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=ayur_flow_sutra
-DB_USER=vivek.m
+DB_USER=sahanak.m
 DB_PASSWORD=
 
 # JWT Configuration
@@ -212,7 +212,7 @@ JWT_SECRET=your-super-secret-jwt-key-change-this-in-production-make-it-very-long
 JWT_EXPIRES_IN=24h
 
 # CORS Configuration
-FRONTEND_URL=http://localhost:8081
+FRONTEND_URL=http://localhost:8080
 ```
 
 #### Frontend Configuration (if needed)
@@ -229,7 +229,7 @@ touch .env
 
 3. Add frontend environment variables (if needed):
 ```env
-VITE_API_BASE_URL=http://localhost:3003
+VITE_API_BASE_URL=http://localhost:3001
 ```
 
 ### Step 7: Install Dependencies
@@ -314,10 +314,10 @@ bun run preview
 
 ### Step 9: Verify Installation
 
-1. **Backend API**: Open http://localhost:3003 in your browser
+1. **Backend API**: Open http://localhost:3001 in your browser
    - You should see a basic API response or "Cannot GET /" message
 
-2. **Frontend**: Open http://localhost:8081 in your browser
+2. **Frontend**: Open http://localhost:8080 in your browser
    - You should see the Ayur Flow Sutra application login page
 
 3. **Database Connection**: Check backend logs for successful database connection
@@ -348,11 +348,11 @@ net start postgresql-x64-15
 
 **Error**: "password authentication failed"
 - Double-check your database credentials in the `.env` file
-- Ensure the user `vivek.m` has proper database permissions
+- Ensure the user `sahanak.m` has proper database permissions
 - If needed, reconnect and grant permissions:
 ```sql
 psql -U postgres
-GRANT ALL PRIVILEGES ON DATABASE ayur_flow_sutra TO vivek.m;
+GRANT ALL PRIVILEGES ON DATABASE ayur_flow_sutra TO sahanak.m;
 ```
 
 #### Port Already in Use
@@ -361,12 +361,12 @@ GRANT ALL PRIVILEGES ON DATABASE ayur_flow_sutra TO vivek.m;
 ```bash
 # Find process using the port
 # macOS/Linux:
-lsof -i :3003
-lsof -i :8081
+lsof -i :3001
+lsof -i :8080
 
 # Windows:
-netstat -ano | findstr :3003
-netstat -ano | findstr :8081
+netstat -ano | findstr :3001
+netstat -ano | findstr :8080
 
 # Kill the process
 # macOS/Linux:
@@ -541,11 +541,11 @@ brew services start postgresql  # macOS
 1. **Start PostgreSQL** (if not running as a service)
 2. **Start Backend**: `cd backend && npm run dev`
 3. **Start Frontend**: `npm run dev` (from project root)
-4. **Access Application**: http://localhost:8081
+4. **Access Application**: http://localhost:8080
 
 ### Development URLs
-- **Frontend**: http://localhost:8081
-- **Backend API**: http://localhost:3003
+- **Frontend**: http://localhost:8080
+- **Backend API**: http://localhost:3001
 
 ### Stopping Services
 - If using `start-dev.sh`: Press `Ctrl+C` in the terminal

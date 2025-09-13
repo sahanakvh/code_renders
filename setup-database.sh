@@ -21,7 +21,7 @@ echo "✅ PostgreSQL found"
 
 # Default values
 DB_NAME="ayur_flow_sutra"
-DB_USER="vivek.m"
+DB_USER="sahanak"
 DB_PASSWORD=""
 POSTGRES_USER="postgres"
 

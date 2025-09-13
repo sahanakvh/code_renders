@@ -6,9 +6,9 @@ dotenv.config();
 const pool = new Pool({
   host: process.env.DB_HOST || 'localhost',
   port: parseInt(process.env.DB_PORT || '5432'),
-  database: process.env.DB_NAME || 'ayurflow',
-  user: process.env.DB_USER || 'vivek',
-  password: process.env.DB_PASSWORD || 'password',
+  database: process.env.DB_NAME || 'ayur_flow_sutra',
+  user: process.env.DB_USER || 'sahanak',
+  password: process.env.DB_PASSWORD || '',
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,

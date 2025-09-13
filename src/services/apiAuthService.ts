@@ -3,7 +3,7 @@ import { LoginCredentials, RegisterData, AuthUser, AuthResponse } from './mockAu
 // Re-export types for easier imports
 export type { LoginCredentials, RegisterData, AuthUser, AuthResponse };
 
-const API_BASE_URL = 'http://localhost:3003/api';
+const API_BASE_URL = 'http://localhost:3001/api';
 
 class ApiAuthService {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {

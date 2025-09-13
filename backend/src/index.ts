@@ -25,7 +25,7 @@ const limiter = rateLimit({
 app.use(helmet()); // Security headers
 app.use(limiter); // Rate limiting
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:8081',
+  origin: process.env.FRONTEND_URL || 'http://localhost:8080',
   credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));

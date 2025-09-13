@@ -52,6 +52,15 @@ brew install postgresql
 # Start PostgreSQL service
 brew services start postgresql
 
+# Create the postgres superuser (required for setup script)
+createuser -s postgres
+
+# Set password for postgres user (remember this password!)
+psql -U $(whoami) -d postgres -c "ALTER USER postgres PASSWORD 'your_postgres_password';"
+
+# Note: Your system user (vivek.m) will be used for database access
+# No additional database user creation is needed
+
 # Verify installation
 psql --version
 ```
@@ -95,18 +104,46 @@ powershell -c "irm bun.sh/install.ps1 | iex"
 
 ### Step 5: Set Up the Database
 
-#### Create Database and User
+#### Option 1: Use Automated Setup Scripts (Recommended)
+
+**Important**: Before running the setup script, ensure you have:
+- PostgreSQL installed and running
+- The `postgres` superuser created (see Step 2)
+- The password for the `postgres` user
+
+**macOS/Linux:**
+```bash
+# Navigate to project root
+cd /path/to/ayur-flow-sutra
+
+# Run the automated setup script
+./setup-database.sh
+```
+
+When prompted:
+1. Enter the password you set for the `postgres` superuser
+   (Note: The script will use your system user `vivek.m` for database access)
+
+**Windows:**
+```cmd
+# Navigate to project root
+cd \path\to\ayur-flow-sutra
+
+# Run the automated setup script
+setup-database.bat
+```
+
+#### Option 2: Manual Database Setup (if automated script doesn't work)
 
 ##### macOS:
 ```bash
-# Connect to PostgreSQL
-psql postgres
+# Connect to PostgreSQL as postgres user
+psql -U postgres -h localhost
 
 # In PostgreSQL prompt, run these commands:
 CREATE DATABASE ayur_flow_sutra;
-CREATE USER ayur_user WITH PASSWORD 'your_secure_password';
-GRANT ALL PRIVILEGES ON DATABASE ayur_flow_sutra TO ayur_user;
-ALTER USER ayur_user CREATEDB;
+GRANT ALL PRIVILEGES ON DATABASE ayur_flow_sutra TO vivek.m;
+ALTER USER vivek.m CREATEDB;
 
 # Exit PostgreSQL
 \q
@@ -119,47 +156,24 @@ psql -U postgres -h localhost
 
 # In PostgreSQL prompt, run these commands:
 CREATE DATABASE ayur_flow_sutra;
-CREATE USER ayur_user WITH PASSWORD 'your_secure_password';
-GRANT ALL PRIVILEGES ON DATABASE ayur_flow_sutra TO ayur_user;
-ALTER USER ayur_user CREATEDB;
+GRANT ALL PRIVILEGES ON DATABASE ayur_flow_sutra TO vivek.m;
+ALTER USER vivek.m CREATEDB;
 
 # Exit PostgreSQL
 \q
 ```
 
-#### Initialize Database Schema
-
-##### Option 1: Use Automated Setup Scripts (Recommended)
-
-**macOS/Linux:**
-```bash
-# Navigate to project root
-cd /path/to/ayur-flow-sutra
-
-# Run the automated setup script
-./setup-database.sh
-```
-
-**Windows:**
-```cmd
-# Navigate to project root
-cd \path\to\ayur-flow-sutra
-
-# Run the automated setup script
-setup-database.bat
-```
-
-##### Option 2: Manual Setup
+#### Initialize Database Schema (if using manual setup)
 
 ```bash
 # Navigate to project root
 cd /path/to/ayur-flow-sutra
 
 # Run the database schema
-psql -U ayur_user -d ayur_flow_sutra -f database/schema.sql
+psql -U vivek.m -d ayur_flow_sutra -f database/schema.sql
 
 # Optional: Load seed data
-psql -U ayur_user -d ayur_flow_sutra -f database/seed.sql
+psql -U vivek.m -d ayur_flow_sutra -f database/seed.sql
 ```
 
 ### Step 6: Configure Environment Variables
@@ -186,12 +200,12 @@ NODE_ENV=development
 PORT=3003
 
 # Database Configuration
-DATABASE_URL=postgresql://ayur_user:your_secure_password@localhost:5432/ayur_flow_sutra
+DATABASE_URL=postgresql://vivek.m:@localhost:5432/ayur_flow_sutra
 DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=ayur_flow_sutra
-DB_USER=ayur_user
-DB_PASSWORD=your_secure_password
+DB_USER=vivek.m
+DB_PASSWORD=
 
 # JWT Configuration
 JWT_SECRET=your-super-secret-jwt-key-change-this-in-production-make-it-very-long-and-random
@@ -334,11 +348,11 @@ net start postgresql-x64-15
 
 **Error**: "password authentication failed"
 - Double-check your database credentials in the `.env` file
-- Ensure the user exists and has the correct password
-- Reset user password if needed:
+- Ensure the user `vivek.m` has proper database permissions
+- If needed, reconnect and grant permissions:
 ```sql
 psql -U postgres
-ALTER USER ayur_user WITH PASSWORD 'new_password';
+GRANT ALL PRIVILEGES ON DATABASE ayur_flow_sutra TO vivek.m;
 ```
 
 #### Port Already in Use

@@ -76,12 +76,12 @@ if %errorlevel% equ 0 (
     exit /b 1
 )
 
-REM Load seed data
-echo Loading seed data...
-psql -U %DB_USER% -d %DB_NAME% -f database/seed.sql
+REM Load seed data with authentication
+echo Loading seed data with authentication...
+psql -U %DB_USER% -d %DB_NAME% -f database/seed_with_auth.sql
 
 if %errorlevel% equ 0 (
-    echo ✅ Seed data loaded
+    echo ✅ Seed data with authentication loaded
 ) else (
     echo ❌ Failed to load seed data
     pause

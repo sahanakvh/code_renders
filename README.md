@@ -126,6 +126,15 @@ ALTER USER ayur_user CREATEDB;
 # Exit PostgreSQL
 \q
 ```
+### Step 6: Set Up the Code in vs code
+
+Download vs code from google for mac/windows
+After installation open the vs code and open the folder where you have the repoistory cloned
+Inside vs code open terminal
+run the below command
+```bash
+npm install
+```
 
 #### Initialize Database Schema
 
@@ -133,10 +142,8 @@ ALTER USER ayur_user CREATEDB;
 
 **macOS/Linux:**
 ```bash
-# Navigate to project root
-cd /path/to/ayur-flow-sutra
 
-# Run the automated setup script
+# Run the automated setup script in the root of you code repository
 ./setup-database.sh
 ```
 

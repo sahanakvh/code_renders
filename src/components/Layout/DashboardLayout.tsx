@@ -44,6 +44,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     { name: 'Patients', href: '/patients', icon: Users, current: false },
     { name: 'Therapists', href: '/therapists', icon: Users, current: false },
     { name: 'Reports', href: '/reports', icon: Calendar, current: false },
+    { name: 'Feedback', href: '/feedback', icon: Settings, current: false },
   ];
 
   return (

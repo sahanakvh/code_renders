@@ -1,0 +1,28 @@
+{
+  "name": "ayur-flow-sutra",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": ["client"],
+  "scripts": {
+    "dev": "ts-node src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev:all": "concurrently \"ts-node src/index.ts\" \"npm --prefix client run dev\"",
+    "migrate": "psql \"$DATABASE_URL\" -f migrations/001_create_scheduler_tables.sql && psql \"$DATABASE_URL\" -f migrations/002_seed_sample.sql"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "helmet": "^7.0.0",
+    "pg": "^8.11.3"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.13",
+    "@types/express": "^4.17.17",
+    "@types/node": "^20.5.0",
+    "concurrently": "^8.2.2",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.1.6"
+  }
+}

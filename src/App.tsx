@@ -9,9 +9,8 @@ import LoginPage from "./pages/LoginPage";
 import Index from "./pages/Index";
 import PatientPage from "./pages/PatientPage";
 import TherapistPage from "./pages/TherapistPage";
-
 import NotFound from "./pages/NotFound";
-import Feedback from "./pages/Feedback";
+import Schedule from "./pages/Schedule";
 
 const queryClient = new QueryClient();
 
@@ -52,12 +51,22 @@ const AppRoutes = () => {
         path="/patient" 
         element={
           <ProtectedRoute requiredRole="patient">
+            
             <PatientPage />
           </ProtectedRoute>
         } 
       />
+            <Route 
+        path="/schedule" 
+        element={
+          <ProtectedRoute requiredRole="patient">
+            <Schedule/>
+            
+          </ProtectedRoute>
+        } 
+      />
       <Route 
-        path="/doctors" 
+        path="/therapists" 
         element={
           <ProtectedRoute requiredRole="therapist">
             <TherapistPage />
@@ -66,7 +75,6 @@ const AppRoutes = () => {
       />
       <Route path="/landing" element={<Index />} />
       <Route path="/login" element={<Navigate to="/" replace />} />
-      <Route path="/feedback" element={<Feedback />} />
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<NotFound />} />
     </Routes>

@@ -6,6 +6,7 @@ import { Calendar, Clock, User, MapPin, Plus, Heart, Brain, Activity } from 'luc
 import { Patient, TherapySession, BookingRequest, MentalHealthAssessment } from '@/types';
 import { databaseService as db } from '@/services/databaseService';
 import DashboardLayout from '../Layout/DashboardLayout';
+import Schedule from '@/pages/Schedule';
 
 interface PatientDashboardProps {
   patient: Patient;
@@ -99,11 +100,13 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({ patient }) => {
 
   return (
     <DashboardLayout currentUser={patient} notifications={3} userType="patient">
+      <h3></h3>
       <div className="p-6 space-y-6">
         {/* Welcome Header */}
         <div className="bg-gradient-to-r from-primary to-secondary rounded-xl p-6 text-white">
+        
           <h1 className="text-2xl font-bold mb-2">
-            Welcome back, {patient.full_name.split(' ')[0]}! 🧘‍♂️
+            Welcome back, {patient.full_name.split(' ')[0]}! 🧘‍♂️sdvsdjvwv
           </h1>
           <p className="text-white/90">
             Your wellness journey continues. Here's your health overview.
@@ -297,6 +300,7 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({ patient }) => {
             )}
           </CardContent>
         </Card>
+        
       </div>
     </DashboardLayout>
   );

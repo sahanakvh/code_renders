@@ -106,7 +106,7 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({ patient }) => {
         <div className="bg-gradient-to-r from-primary to-secondary rounded-xl p-6 text-white">
         
           <h1 className="text-2xl font-bold mb-2">
-            Welcome back, {patient.full_name.split(' ')[0]}! 🧘‍♂️sdvsdjvwv
+            Welcome back, {patient.full_name.split(' ')[0]}! 🧘‍♂️
           </h1>
           <p className="text-white/90">
             Your wellness journey continues. Here's your health overview.

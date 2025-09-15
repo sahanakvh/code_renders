@@ -11,6 +11,7 @@ import PatientPage from "./pages/PatientPage";
 import TherapistPage from "./pages/TherapistPage";
 import NotFound from "./pages/NotFound";
 import Schedule from "./pages/Schedule";
+import Feedback from "./pages/Feedback";
 
 const queryClient = new QueryClient();
 
@@ -73,6 +74,7 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } 
       />
+      <Route path="/feedback" element={<Feedback />} />
       <Route path="/landing" element={<Index />} />
       <Route path="/login" element={<Navigate to="/" replace />} />
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

@@ -1,0 +1,746 @@
+--
+-- PostgreSQL database dump
+--
+
+\restrict OHPg7ctKZyjfPSgVFifTgWfs0rBUGTzwbSBCHCpH8r9NfyEd1fdrlePThvK62gW
+
+-- Dumped from database version 14.19 (Homebrew)
+-- Dumped by pg_dump version 14.19 (Homebrew)
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- Name: booking_status; Type: TYPE; Schema: public; Owner: sahanak
+--
+
+CREATE TYPE public.booking_status AS ENUM (
+    'pending',
+    'confirmed',
+    'in_progress',
+    'completed',
+    'cancelled'
+);
+
+
+ALTER TYPE public.booking_status OWNER TO sahanak;
+
+--
+-- Name: session_status; Type: TYPE; Schema: public; Owner: sahanak
+--
+
+CREATE TYPE public.session_status AS ENUM (
+    'scheduled',
+    'checked_in',
+    'in_progress',
+    'completed',
+    'no_show',
+    'cancelled'
+);
+
+
+ALTER TYPE public.session_status OWNER TO sahanak;
+
+--
+-- Name: therapy_type; Type: TYPE; Schema: public; Owner: sahanak
+--
+
+CREATE TYPE public.therapy_type AS ENUM (
+    'abhyanga',
+    'shirodhara',
+    'panchakarma',
+    'nasya',
+    'basti',
+    'virechana'
+);
+
+
+ALTER TYPE public.therapy_type OWNER TO sahanak;
+
+--
+-- Name: user_role; Type: TYPE; Schema: public; Owner: sahanak
+--
+
+CREATE TYPE public.user_role AS ENUM (
+    'patient',
+    'therapist',
+    'admin'
+);
+
+
+ALTER TYPE public.user_role OWNER TO sahanak;
+
+--
+-- Name: update_updated_at_column(); Type: FUNCTION; Schema: public; Owner: sahanak
+--
+
+CREATE FUNCTION public.update_updated_at_column() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION public.update_updated_at_column() OWNER TO sahanak;
+
+SET default_tablespace = '';
+
+SET default_table_access_method = heap;
+
+--
+-- Name: admins; Type: TABLE; Schema: public; Owner: sahanak
+--
+
+CREATE TABLE public.admins (
+    id uuid NOT NULL,
+    permissions text[] DEFAULT ARRAY[]::text[] NOT NULL
+);
+
+
+ALTER TABLE public.admins OWNER TO sahanak;
+
+--
+-- Name: audit_logs; Type: TABLE; Schema: public; Owner: sahanak
+--
+
+CREATE TABLE public.audit_logs (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    user_id uuid,
+    action character varying(255) NOT NULL,
+    table_name character varying(100) NOT NULL,
+    record_id uuid,
+    old_values jsonb,
+    new_values jsonb,
+    "timestamp" timestamp with time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+
+ALTER TABLE public.audit_logs OWNER TO sahanak;
+
+--
+-- Name: booking_requests; Type: TABLE; Schema: public; Owner: sahanak
+--
+
+CREATE TABLE public.booking_requests (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    patient_id uuid NOT NULL,
+    therapy_id uuid NOT NULL,
+    preferred_therapist_id uuid,
+    preferred_date date NOT NULL,
+    preferred_time_slot time without time zone NOT NULL,
+    notes text,
+    status public.booking_status DEFAULT 'pending'::public.booking_status,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+
+ALTER TABLE public.booking_requests OWNER TO sahanak;
+
+--
+-- Name: mental_health_assessments; Type: TABLE; Schema: public; Owner: sahanak
+--
+
+CREATE TABLE public.mental_health_assessments (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    patient_id uuid NOT NULL,
+    session_id uuid,
+    stress_level integer,
+    anxiety_level integer,
+    mood_rating integer,
+    sleep_quality integer,
+    energy_level integer,
+    notes text,
+    assessment_date timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT mental_health_assessments_anxiety_level_check CHECK (((anxiety_level >= 1) AND (anxiety_level <= 10))),
+    CONSTRAINT mental_health_assessments_energy_level_check CHECK (((energy_level >= 1) AND (energy_level <= 10))),
+    CONSTRAINT mental_health_assessments_mood_rating_check CHECK (((mood_rating >= 1) AND (mood_rating <= 10))),
+    CONSTRAINT mental_health_assessments_sleep_quality_check CHECK (((sleep_quality >= 1) AND (sleep_quality <= 10))),
+    CONSTRAINT mental_health_assessments_stress_level_check CHECK (((stress_level >= 1) AND (stress_level <= 10)))
+);
+
+
+ALTER TABLE public.mental_health_assessments OWNER TO sahanak;
+
+--
+-- Name: notifications; Type: TABLE; Schema: public; Owner: sahanak
+--
+
+CREATE TABLE public.notifications (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    user_id uuid NOT NULL,
+    title character varying(255) NOT NULL,
+    message text NOT NULL,
+    type character varying(50) DEFAULT 'info'::character varying,
+    is_read boolean DEFAULT false,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+
+ALTER TABLE public.notifications OWNER TO sahanak;
+
+--
+-- Name: patients; Type: TABLE; Schema: public; Owner: sahanak
+--
+
+CREATE TABLE public.patients (
+    id uuid NOT NULL,
+    date_of_birth date,
+    gender character varying(20),
+    medical_history text,
+    emergency_contact character varying(20),
+    address text
+);
+
+
+ALTER TABLE public.patients OWNER TO sahanak;
+
+--
+-- Name: rooms; Type: TABLE; Schema: public; Owner: sahanak
+--
+
+CREATE TABLE public.rooms (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    name character varying(255) NOT NULL,
+    capacity integer DEFAULT 1 NOT NULL,
+    equipment text[] DEFAULT ARRAY[]::text[],
+    is_available boolean DEFAULT true,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+
+ALTER TABLE public.rooms OWNER TO sahanak;
+
+--
+-- Name: therapists; Type: TABLE; Schema: public; Owner: sahanak
+--
+
+CREATE TABLE public.therapists (
+    id uuid NOT NULL,
+    specializations public.therapy_type[] NOT NULL,
+    experience_years integer DEFAULT 0 NOT NULL,
+    availability_start time without time zone DEFAULT '09:00:00'::time without time zone NOT NULL,
+    availability_end time without time zone DEFAULT '17:00:00'::time without time zone NOT NULL,
+    availability_days text[] DEFAULT ARRAY['monday'::text, 'tuesday'::text, 'wednesday'::text, 'thursday'::text, 'friday'::text] NOT NULL,
+    is_active boolean DEFAULT true
+);
+
+
+ALTER TABLE public.therapists OWNER TO sahanak;
+
+--
+-- Name: therapy_definitions; Type: TABLE; Schema: public; Owner: sahanak
+--
+
+CREATE TABLE public.therapy_definitions (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    name character varying(255) NOT NULL,
+    type public.therapy_type NOT NULL,
+    duration_minutes integer NOT NULL,
+    description text,
+    price numeric(10,2) DEFAULT 0.00 NOT NULL,
+    preparation_time integer DEFAULT 15,
+    cleanup_time integer DEFAULT 15,
+    required_equipment text[] DEFAULT ARRAY[]::text[],
+    contraindications text[] DEFAULT ARRAY[]::text[],
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+
+ALTER TABLE public.therapy_definitions OWNER TO sahanak;
+
+--
+-- Name: therapy_sessions; Type: TABLE; Schema: public; Owner: sahanak
+--
+
+CREATE TABLE public.therapy_sessions (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    booking_request_id uuid NOT NULL,
+    patient_id uuid NOT NULL,
+    therapist_id uuid NOT NULL,
+    therapy_id uuid NOT NULL,
+    room_id uuid NOT NULL,
+    scheduled_start timestamp with time zone NOT NULL,
+    scheduled_end timestamp with time zone NOT NULL,
+    actual_start timestamp with time zone,
+    actual_end timestamp with time zone,
+    status public.session_status DEFAULT 'scheduled'::public.session_status,
+    therapist_notes text,
+    patient_vitals jsonb,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+
+ALTER TABLE public.therapy_sessions OWNER TO sahanak;
+
+--
+-- Name: users; Type: TABLE; Schema: public; Owner: sahanak
+--
+
+CREATE TABLE public.users (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    email character varying(255) NOT NULL,
+    password_hash character varying(255) NOT NULL,
+    full_name character varying(255) NOT NULL,
+    phone character varying(20),
+    role public.user_role NOT NULL,
+    language_preference character varying(50) DEFAULT 'English'::character varying,
+    is_active boolean DEFAULT true,
+    last_login timestamp with time zone,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+
+ALTER TABLE public.users OWNER TO sahanak;
+
+--
+-- Data for Name: admins; Type: TABLE DATA; Schema: public; Owner: sahanak
+--
+
+COPY public.admins (id, permissions) FROM stdin;
+30000000-0000-0000-0000-000000000001	{manage_users,manage_therapies,view_reports,manage_system}
+\.
+
+
+--
+-- Data for Name: audit_logs; Type: TABLE DATA; Schema: public; Owner: sahanak
+--
+
+COPY public.audit_logs (id, user_id, action, table_name, record_id, old_values, new_values, "timestamp") FROM stdin;
+\.
+
+
+--
+-- Data for Name: booking_requests; Type: TABLE DATA; Schema: public; Owner: sahanak
+--
+
+COPY public.booking_requests (id, patient_id, therapy_id, preferred_therapist_id, preferred_date, preferred_time_slot, notes, status, created_at, updated_at) FROM stdin;
+50000000-0000-0000-0000-000000000001	10000000-0000-0000-0000-000000000001	11111111-1111-1111-1111-111111111111	20000000-0000-0000-0000-000000000001	2024-12-20	10:00:00	First time booking, please be gentle	confirmed	2025-09-13 14:41:06.879225+05:30	2025-09-13 14:41:06.879225+05:30
+50000000-0000-0000-0000-000000000002	10000000-0000-0000-0000-000000000002	22222222-2222-2222-2222-222222222222	20000000-0000-0000-0000-000000000002	2024-12-21	14:00:00	Prefer afternoon session	pending	2025-09-13 14:41:06.879225+05:30	2025-09-13 14:41:06.879225+05:30
+50000000-0000-0000-0000-000000000003	10000000-0000-0000-0000-000000000003	33333333-3333-3333-3333-333333333333	20000000-0000-0000-0000-000000000003	2024-12-22	09:00:00	Full detox program requested	confirmed	2025-09-13 14:41:06.879225+05:30	2025-09-13 14:41:06.879225+05:30
+\.
+
+
+--
+-- Data for Name: mental_health_assessments; Type: TABLE DATA; Schema: public; Owner: sahanak
+--
+
+COPY public.mental_health_assessments (id, patient_id, session_id, stress_level, anxiety_level, mood_rating, sleep_quality, energy_level, notes, assessment_date, created_at) FROM stdin;
+\.
+
+
+--
+-- Data for Name: notifications; Type: TABLE DATA; Schema: public; Owner: sahanak
+--
+
+COPY public.notifications (id, user_id, title, message, type, is_read, created_at) FROM stdin;
+\.
+
+
+--
+-- Data for Name: patients; Type: TABLE DATA; Schema: public; Owner: sahanak
+--
+
+COPY public.patients (id, date_of_birth, gender, medical_history, emergency_contact, address) FROM stdin;
+10000000-0000-0000-0000-000000000001	1985-05-15	Male	Demo patient for testing	+91-9876543211	123 Demo St, Demo City
+10000000-0000-0000-0000-000000000002	1985-05-15	Male	Chronic back pain, stress-related issues	+91-9876543211	123 Main St, Mumbai, Maharashtra 400001
+10000000-0000-0000-0000-000000000003	1990-08-22	Female	Anxiety, insomnia, digestive issues	+91-9876543213	456 Park Ave, Delhi, Delhi 110001
+10000000-0000-0000-0000-000000000004	1978-12-10	Male	Hypertension, joint pain, stress	+91-9876543215	789 Ring Road, Bangalore, Karnataka 560001
+10000000-0000-0000-0000-000000000005	1992-03-08	Female	Migraines, work stress, poor sleep	+91-9876543217	321 Garden St, Chennai, Tamil Nadu 600001
+\.
+
+
+--
+-- Data for Name: rooms; Type: TABLE DATA; Schema: public; Owner: sahanak
+--
+
+COPY public.rooms (id, name, capacity, equipment, is_available, created_at) FROM stdin;
+aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa	Abhyanga Suite 1	1	{massage_table,oil_warmer,towel_warmer,aromatherapy_diffuser}	t	2025-09-13 14:41:06.873422+05:30
+bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb	Shirodhara Chamber	1	{shirodhara_table,oil_collection_system,ambient_lighting}	t	2025-09-13 14:41:06.873422+05:30
+cccccccc-cccc-cccc-cccc-cccccccccccc	Panchakarma Center	1	{treatment_table,steam_chamber,herbal_storage}	t	2025-09-13 14:41:06.873422+05:30
+dddddddd-dddd-dddd-dddd-dddddddddddd	Multi-purpose Room A	2	{massage_tables,storage_cabinets,sink}	t	2025-09-13 14:41:06.873422+05:30
+eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee	Consultation Room	1	{examination_table,chair,weighing_scale}	t	2025-09-13 14:41:06.873422+05:30
+\.
+
+
+--
+-- Data for Name: therapists; Type: TABLE DATA; Schema: public; Owner: sahanak
+--
+
+COPY public.therapists (id, specializations, experience_years, availability_start, availability_end, availability_days, is_active) FROM stdin;
+20000000-0000-0000-0000-000000000001	{abhyanga,shirodhara}	5	09:00:00	17:00:00	{monday,tuesday,wednesday,thursday,friday}	t
+20000000-0000-0000-0000-000000000002	{abhyanga,shirodhara,panchakarma}	8	09:00:00	17:00:00	{monday,tuesday,wednesday,thursday,friday,saturday}	t
+20000000-0000-0000-0000-000000000003	{basti,virechana,nasya}	12	08:00:00	16:00:00	{monday,tuesday,wednesday,thursday,friday}	t
+20000000-0000-0000-0000-000000000004	{abhyanga,shirodhara}	6	10:00:00	18:00:00	{tuesday,wednesday,thursday,friday,saturday}	t
+\.
+
+
+--
+-- Data for Name: therapy_definitions; Type: TABLE DATA; Schema: public; Owner: sahanak
+--
+
+COPY public.therapy_definitions (id, name, type, duration_minutes, description, price, preparation_time, cleanup_time, required_equipment, contraindications, created_at) FROM stdin;
+11111111-1111-1111-1111-111111111111	Traditional Abhyanga	abhyanga	60	Full body massage with warm herbal oils	1500.00	15	15	{massage_table,herbal_oils,towels}	{open_wounds,fever,acute_illness}	2025-09-13 14:41:06.871826+05:30
+22222222-2222-2222-2222-222222222222	Calming Shirodhara	shirodhara	45	Continuous stream of warm oil poured on forehead	1800.00	20	20	{shirodhara_table,special_oils,collection_vessel}	{head_injuries,scalp_infections}	2025-09-13 14:41:06.871826+05:30
+33333333-3333-3333-3333-333333333333	Panchakarma Detox	panchakarma	90	Complete detoxification therapy program	3000.00	30	30	{special_equipment,herbal_medicines}	{pregnancy,severe_illness}	2025-09-13 14:41:06.871826+05:30
+44444444-4444-4444-4444-444444444444	Nasya Treatment	nasya	30	Nasal administration of medicated oils	1200.00	10	10	{nasal_drops,cotton_swabs}	{nasal_infections,bleeding_disorders}	2025-09-13 14:41:06.871826+05:30
+55555555-5555-5555-5555-555555555555	Basti Therapy	basti	75	Medicated enema therapy for digestive health	2200.00	25	25	{enema_equipment,medicated_oils}	{rectal_bleeding,severe_dehydration}	2025-09-13 14:41:06.871826+05:30
+66666666-6666-6666-6666-666666666666	Virechana Cleansing	virechana	120	Therapeutic purgation for liver detox	2500.00	30	30	{herbal_medicines,monitoring_equipment}	{pregnancy,weakness}	2025-09-13 14:41:06.871826+05:30
+\.
+
+
+--
+-- Data for Name: therapy_sessions; Type: TABLE DATA; Schema: public; Owner: sahanak
+--
+
+COPY public.therapy_sessions (id, booking_request_id, patient_id, therapist_id, therapy_id, room_id, scheduled_start, scheduled_end, actual_start, actual_end, status, therapist_notes, patient_vitals, created_at, updated_at) FROM stdin;
+\.
+
+
+--
+-- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: sahanak
+--
+
+COPY public.users (id, email, password_hash, full_name, phone, role, language_preference, is_active, last_login, created_at, updated_at) FROM stdin;
+d1f4bf4d-8f29-4cfa-af7e-63c54bfd441e	pass@demo.com	$2a$12$tUGE7cfULaXShGcTpGHaPOlDCCYzfQ0qTCOrG4rHUOjueUnLt/gti	pass	1234567890	patient	English	t	\N	2025-09-13 16:10:55.337906+05:30	2025-09-13 16:10:55.337906+05:30
+10000000-0000-0000-0000-000000000001	patient@demo.com	$2b$12$noXWa3qYINwY.km8MNJPPugEwqqO7zDrOqQUloEowd8lIwa/Pxz8C	Demo Patient	+91-9876543210	patient	English	t	\N	2025-09-13 14:41:06.874611+05:30	2025-09-13 16:27:36.865926+05:30
+10000000-0000-0000-0000-000000000002	john.smith@email.com	$2b$12$noXWa3qYINwY.km8MNJPPugEwqqO7zDrOqQUloEowd8lIwa/Pxz8C	John Smith	+91-9876543212	patient	English	t	\N	2025-09-13 14:41:06.874611+05:30	2025-09-13 16:32:09.414007+05:30
+10000000-0000-0000-0000-000000000003	priya.sharma@email.com	$2b$12$noXWa3qYINwY.km8MNJPPugEwqqO7zDrOqQUloEowd8lIwa/Pxz8C	Priya Sharma	+91-9876543214	patient	Hindi	t	\N	2025-09-13 14:41:06.874611+05:30	2025-09-13 16:32:09.432676+05:30
+10000000-0000-0000-0000-000000000004	rajesh.kumar@email.com	$2b$12$noXWa3qYINwY.km8MNJPPugEwqqO7zDrOqQUloEowd8lIwa/Pxz8C	Rajesh Kumar	+91-9876543216	patient	Hindi	t	\N	2025-09-13 14:41:06.874611+05:30	2025-09-13 16:32:09.433322+05:30
+10000000-0000-0000-0000-000000000005	sarah.johnson@email.com	$2b$12$noXWa3qYINwY.km8MNJPPugEwqqO7zDrOqQUloEowd8lIwa/Pxz8C	Sarah Johnson	+91-9876543218	patient	English	t	\N	2025-09-13 14:41:06.874611+05:30	2025-09-13 16:32:09.433646+05:30
+20000000-0000-0000-0000-000000000001	therapist@demo.com	$2b$12$noXWa3qYINwY.km8MNJPPugEwqqO7zDrOqQUloEowd8lIwa/Pxz8C	Demo Therapist	+91-9876543220	therapist	English	t	\N	2025-09-13 14:41:06.877084+05:30	2025-09-13 16:32:09.434007+05:30
+20000000-0000-0000-0000-000000000002	dr.meera@ayursutra.com	$2b$12$noXWa3qYINwY.km8MNJPPugEwqqO7zDrOqQUloEowd8lIwa/Pxz8C	Dr. Meera Patel	+91-9876543221	therapist	English	t	\N	2025-09-13 14:41:06.877084+05:30	2025-09-13 16:32:09.434324+05:30
+20000000-0000-0000-0000-000000000003	dr.anand@ayursutra.com	$2b$12$noXWa3qYINwY.km8MNJPPugEwqqO7zDrOqQUloEowd8lIwa/Pxz8C	Dr. Anand Gupta	+91-9876543222	therapist	Hindi	t	\N	2025-09-13 14:41:06.877084+05:30	2025-09-13 16:32:09.43476+05:30
+20000000-0000-0000-0000-000000000004	dr.kavitha@ayursutra.com	$2b$12$noXWa3qYINwY.km8MNJPPugEwqqO7zDrOqQUloEowd8lIwa/Pxz8C	Dr. Kavitha Rao	+91-9876543223	therapist	English	t	\N	2025-09-13 14:41:06.877084+05:30	2025-09-13 16:32:09.435113+05:30
+30000000-0000-0000-0000-000000000001	admin@demo.com	$2b$12$noXWa3qYINwY.km8MNJPPugEwqqO7zDrOqQUloEowd8lIwa/Pxz8C	Demo Admin	+91-9876543230	admin	English	t	\N	2025-09-13 14:41:06.87872+05:30	2025-09-13 16:32:09.435522+05:30
+cf8a2b99-74e5-4edb-8074-354491835745	roopa@gmail.com	$2a$12$7wYOlfvYiqmMyFZUmLaameH/7FlThHaDEU.koKKzkKJSLQpy73Whe	roopa	1234567890	patient	English	t	\N	2025-09-13 17:22:13.734923+05:30	2025-09-13 17:22:13.734923+05:30
+a309d8af-5c54-48af-9ec5-41fa1f0cbdd8	kiran@demo.com	$2a$12$j6jTUmvsgP/ZU7vSA3D.Y.0ruRXU/YsAGNyYf4Px0hXWOMYL55NdC	kiran	1234567890	therapist	English	t	\N	2025-09-13 17:23:05.442578+05:30	2025-09-13 17:23:05.442578+05:30
+8281f5b8-fe01-4d2b-b8e9-09e91b390af7	angel@gmail.com	$2a$12$t4odvc9a0UXVkwqIT7OLq.8g44EKWemzZpQWT7mb6z/lQPkrYHf5y	angel	1234567890	patient	English	t	\N	2025-09-13 17:28:23.03567+05:30	2025-09-13 17:28:23.03567+05:30
+e4ed416f-57aa-4139-a5db-c7a44cfbc813	kamal@gmail.com	$2a$12$.KiyBKJAejuDYfmIUkTWIOVND2JbE7Z8g5Hz9bsljP65SO1Y98XWG	kamal	1234567890	therapist	English	t	\N	2025-09-13 17:28:56.775419+05:30	2025-09-13 17:28:56.775419+05:30
+b80fc951-2ae0-4943-8bfd-36d104e4d005	vijay@gmail.com	$2a$12$R46AN5AOBz91HN9x6pHSMe03vk1ssr3Ubrq04hj/vNjTt/ttfhVay	vijay	1234567890	patient	English	t	\N	2025-09-13 17:41:32.249838+05:30	2025-09-13 17:41:32.249838+05:30
+e10d816d-ab8b-4b4c-97a1-2eb89d9fd289	roshna@gmail.com	$2a$12$MN1f/WdJ7tlr8cVcII.s5ePT/uSLsYp3GczB6v7Bn7NxHqiDaCBoa	roshna	1234567890	patient	English	t	\N	2025-09-13 18:25:32.053069+05:30	2025-09-13 18:25:32.053069+05:30
+5451b6ac-4912-4e0f-8942-d98cedf9a26d	dr.smitha@gmail.com	$2a$12$ms5iQXDhf2WQlTeVsty0yObkmTcXtHV06JXNorlxOrjMkhJYhcsIi	dr.smitha	1234567890	therapist	English	t	\N	2025-09-13 18:27:35.244507+05:30	2025-09-13 18:27:35.244507+05:30
+dafb841d-b397-4f6e-8694-364078a8a56d	rohan@gmail.com	$2a$12$G.2uTX00112JB6o2Edc.fu5GArxU6hZ1.T7c3sCXXlejOLnhb9hlC	rohan	1234567890	patient	English	t	\N	2025-09-13 21:59:50.259702+05:30	2025-09-13 21:59:50.259702+05:30
+\.
+
+
+--
+-- Name: admins admins_pkey; Type: CONSTRAINT; Schema: public; Owner: sahanak
+--
+
+ALTER TABLE ONLY public.admins
+    ADD CONSTRAINT admins_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: audit_logs audit_logs_pkey; Type: CONSTRAINT; Schema: public; Owner: sahanak
+--
+
+ALTER TABLE ONLY public.audit_logs
+    ADD CONSTRAINT audit_logs_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: booking_requests booking_requests_pkey; Type: CONSTRAINT; Schema: public; Owner: sahanak
+--
+
+ALTER TABLE ONLY public.booking_requests
+    ADD CONSTRAINT booking_requests_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: mental_health_assessments mental_health_assessments_pkey; Type: CONSTRAINT; Schema: public; Owner: sahanak
+--
+
+ALTER TABLE ONLY public.mental_health_assessments
+    ADD CONSTRAINT mental_health_assessments_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: notifications notifications_pkey; Type: CONSTRAINT; Schema: public; Owner: sahanak
+--
+
+ALTER TABLE ONLY public.notifications
+    ADD CONSTRAINT notifications_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: patients patients_pkey; Type: CONSTRAINT; Schema: public; Owner: sahanak
+--
+
+ALTER TABLE ONLY public.patients
+    ADD CONSTRAINT patients_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: rooms rooms_pkey; Type: CONSTRAINT; Schema: public; Owner: sahanak
+--
+
+ALTER TABLE ONLY public.rooms
+    ADD CONSTRAINT rooms_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: therapists therapists_pkey; Type: CONSTRAINT; Schema: public; Owner: sahanak
+--
+
+ALTER TABLE ONLY public.therapists
+    ADD CONSTRAINT therapists_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: therapy_definitions therapy_definitions_pkey; Type: CONSTRAINT; Schema: public; Owner: sahanak
+--
+
+ALTER TABLE ONLY public.therapy_definitions
+    ADD CONSTRAINT therapy_definitions_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: therapy_sessions therapy_sessions_pkey; Type: CONSTRAINT; Schema: public; Owner: sahanak
+--
+
+ALTER TABLE ONLY public.therapy_sessions
+    ADD CONSTRAINT therapy_sessions_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: users users_email_key; Type: CONSTRAINT; Schema: public; Owner: sahanak
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_email_key UNIQUE (email);
+
+
+--
+-- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: sahanak
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: idx_booking_requests_patient_id; Type: INDEX; Schema: public; Owner: sahanak
+--
+
+CREATE INDEX idx_booking_requests_patient_id ON public.booking_requests USING btree (patient_id);
+
+
+--
+-- Name: idx_booking_requests_status; Type: INDEX; Schema: public; Owner: sahanak
+--
+
+CREATE INDEX idx_booking_requests_status ON public.booking_requests USING btree (status);
+
+
+--
+-- Name: idx_notifications_is_read; Type: INDEX; Schema: public; Owner: sahanak
+--
+
+CREATE INDEX idx_notifications_is_read ON public.notifications USING btree (is_read);
+
+
+--
+-- Name: idx_notifications_user_id; Type: INDEX; Schema: public; Owner: sahanak
+--
+
+CREATE INDEX idx_notifications_user_id ON public.notifications USING btree (user_id);
+
+
+--
+-- Name: idx_therapy_sessions_patient_id; Type: INDEX; Schema: public; Owner: sahanak
+--
+
+CREATE INDEX idx_therapy_sessions_patient_id ON public.therapy_sessions USING btree (patient_id);
+
+
+--
+-- Name: idx_therapy_sessions_scheduled_start; Type: INDEX; Schema: public; Owner: sahanak
+--
+
+CREATE INDEX idx_therapy_sessions_scheduled_start ON public.therapy_sessions USING btree (scheduled_start);
+
+
+--
+-- Name: idx_therapy_sessions_therapist_id; Type: INDEX; Schema: public; Owner: sahanak
+--
+
+CREATE INDEX idx_therapy_sessions_therapist_id ON public.therapy_sessions USING btree (therapist_id);
+
+
+--
+-- Name: idx_users_email; Type: INDEX; Schema: public; Owner: sahanak
+--
+
+CREATE INDEX idx_users_email ON public.users USING btree (email);
+
+
+--
+-- Name: idx_users_role; Type: INDEX; Schema: public; Owner: sahanak
+--
+
+CREATE INDEX idx_users_role ON public.users USING btree (role);
+
+
+--
+-- Name: booking_requests update_booking_requests_updated_at; Type: TRIGGER; Schema: public; Owner: sahanak
+--
+
+CREATE TRIGGER update_booking_requests_updated_at BEFORE UPDATE ON public.booking_requests FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+
+
+--
+-- Name: therapy_sessions update_therapy_sessions_updated_at; Type: TRIGGER; Schema: public; Owner: sahanak
+--
+
+CREATE TRIGGER update_therapy_sessions_updated_at BEFORE UPDATE ON public.therapy_sessions FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+
+
+--
+-- Name: users update_users_updated_at; Type: TRIGGER; Schema: public; Owner: sahanak
+--
+
+CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON public.users FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+
+
+--
+-- Name: admins admins_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: sahanak
+--
+
+ALTER TABLE ONLY public.admins
+    ADD CONSTRAINT admins_id_fkey FOREIGN KEY (id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: audit_logs audit_logs_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: sahanak
+--
+
+ALTER TABLE ONLY public.audit_logs
+    ADD CONSTRAINT audit_logs_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE SET NULL;
+
+
+--
+-- Name: booking_requests booking_requests_patient_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: sahanak
+--
+
+ALTER TABLE ONLY public.booking_requests
+    ADD CONSTRAINT booking_requests_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: booking_requests booking_requests_preferred_therapist_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: sahanak
+--
+
+ALTER TABLE ONLY public.booking_requests
+    ADD CONSTRAINT booking_requests_preferred_therapist_id_fkey FOREIGN KEY (preferred_therapist_id) REFERENCES public.users(id) ON DELETE SET NULL;
+
+
+--
+-- Name: booking_requests booking_requests_therapy_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: sahanak
+--
+
+ALTER TABLE ONLY public.booking_requests
+    ADD CONSTRAINT booking_requests_therapy_id_fkey FOREIGN KEY (therapy_id) REFERENCES public.therapy_definitions(id) ON DELETE CASCADE;
+
+
+--
+-- Name: mental_health_assessments mental_health_assessments_patient_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: sahanak
+--
+
+ALTER TABLE ONLY public.mental_health_assessments
+    ADD CONSTRAINT mental_health_assessments_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: mental_health_assessments mental_health_assessments_session_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: sahanak
+--
+
+ALTER TABLE ONLY public.mental_health_assessments
+    ADD CONSTRAINT mental_health_assessments_session_id_fkey FOREIGN KEY (session_id) REFERENCES public.therapy_sessions(id) ON DELETE SET NULL;
+
+
+--
+-- Name: notifications notifications_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: sahanak
+--
+
+ALTER TABLE ONLY public.notifications
+    ADD CONSTRAINT notifications_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: patients patients_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: sahanak
+--
+
+ALTER TABLE ONLY public.patients
+    ADD CONSTRAINT patients_id_fkey FOREIGN KEY (id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: therapists therapists_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: sahanak
+--
+
+ALTER TABLE ONLY public.therapists
+    ADD CONSTRAINT therapists_id_fkey FOREIGN KEY (id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: therapy_sessions therapy_sessions_booking_request_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: sahanak
+--
+
+ALTER TABLE ONLY public.therapy_sessions
+    ADD CONSTRAINT therapy_sessions_booking_request_id_fkey FOREIGN KEY (booking_request_id) REFERENCES public.booking_requests(id) ON DELETE CASCADE;
+
+
+--
+-- Name: therapy_sessions therapy_sessions_patient_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: sahanak
+--
+
+ALTER TABLE ONLY public.therapy_sessions
+    ADD CONSTRAINT therapy_sessions_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: therapy_sessions therapy_sessions_room_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: sahanak
+--
+
+ALTER TABLE ONLY public.therapy_sessions
+    ADD CONSTRAINT therapy_sessions_room_id_fkey FOREIGN KEY (room_id) REFERENCES public.rooms(id) ON DELETE CASCADE;
+
+
+--
+-- Name: therapy_sessions therapy_sessions_therapist_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: sahanak
+--
+
+ALTER TABLE ONLY public.therapy_sessions
+    ADD CONSTRAINT therapy_sessions_therapist_id_fkey FOREIGN KEY (therapist_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: therapy_sessions therapy_sessions_therapy_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: sahanak
+--
+
+ALTER TABLE ONLY public.therapy_sessions
+    ADD CONSTRAINT therapy_sessions_therapy_id_fkey FOREIGN KEY (therapy_id) REFERENCES public.therapy_definitions(id) ON DELETE CASCADE;
+
+
+--
+-- PostgreSQL database dump complete
+--
+
+\unrestrict OHPg7ctKZyjfPSgVFifTgWfs0rBUGTzwbSBCHCpH8r9NfyEd1fdrlePThvK62gW
+

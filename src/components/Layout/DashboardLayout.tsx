@@ -41,7 +41,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const navigationItems = [
     { name: 'Dashboard', href: '/dashboard', icon: Calendar, current: true },
     { name: 'Schedule', href: '/schedule', icon: Calendar, current: false },
-    { name: 'Patients', href: '/patients', icon: Users, current: false },
     { name: 'Therapists', href: '/therapists', icon: Users, current: false },
     { name: 'Reports', href: '/reports', icon: Calendar, current: false },
     { name: 'Feedback', href: '/feedback', icon: Settings, current: false },

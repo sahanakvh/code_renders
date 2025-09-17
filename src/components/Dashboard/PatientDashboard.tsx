@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -17,6 +18,7 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({ patient }) => {
   const [recentBookings, setRecentBookings] = useState<BookingRequest[]>([]);
   const [assessments, setAssessments] = useState<MentalHealthAssessment[]>([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadDashboardData();
@@ -172,7 +174,7 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({ patient }) => {
                 <Calendar className="h-5 w-5" />
                 Upcoming Sessions
               </CardTitle>
-              <Button size="sm">
+              <Button size="sm" onClick={() => navigate('/schedule')}>
                 <Plus className="h-4 w-4 mr-2" />
                 Book Session
               </Button>

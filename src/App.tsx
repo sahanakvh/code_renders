@@ -12,6 +12,7 @@ import TherapistPage from "./pages/TherapistPage";
 import NotFound from "./pages/NotFound";
 import Schedule from "./pages/Schedule";
 import Feedback from "./pages/Feedback";
+import TherapistsPage from "./pages/TherapistsPage";
 
 const queryClient = new QueryClient();
 
@@ -40,40 +41,33 @@ const AppRoutes = () => {
 
   return (
     <Routes>
-      <Route 
-        path="/" 
+      <Route
+        path="/"
         element={
-          user?.role === 'therapist' ? 
-            <Navigate to="/doctors" replace /> : 
+          user?.role === "therapist" ? (
+            <Navigate to="/doctors" replace />
+          ) : (
             <Navigate to="/patient" replace />
-        } 
+          )
+        }
       />
-      <Route 
-        path="/patient" 
+      <Route
+        path="/patient"
         element={
           <ProtectedRoute requiredRole="patient">
-            
             <PatientPage />
           </ProtectedRoute>
-        } 
+        }
       />
-            <Route 
-        path="/schedule" 
+      <Route
+        path="/schedule"
         element={
           <ProtectedRoute requiredRole="patient">
-            <Schedule/>
-            
+            <Schedule />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/therapists" 
-        element={
-          <ProtectedRoute requiredRole="therapist">
-            <TherapistPage />
-          </ProtectedRoute>
-        } 
-      />
+      <Route path="/therapists" element={<TherapistsPage />} />
       <Route path="/feedback" element={<Feedback />} />
       <Route path="/landing" element={<Index />} />
       <Route path="/login" element={<Navigate to="/" replace />} />
